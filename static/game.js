@@ -3,7 +3,9 @@ const GAME_HEIGHT = 720;
 
 class Bird {
     constructor(){
+        // get birds div element
         this.birdDisplay = document.getElementById('bird');
+        // store it's current location
         this.position = {
             x: 50,
             y: 150,
@@ -65,8 +67,9 @@ let gameWindow = document.getElementById('game-window');
 
 // create bird
 let bird = new Bird();
-// create container for walls
+// walls individual id
 let newWallID = 0;
+// create container for walls
 let walls = [];
 
 
@@ -75,6 +78,10 @@ let walls = [];
 let birdTimer = window.setInterval(function a(){
     bird.moveDown();
 }, 35);
+
+// //////////////////////////////////////////
+//           experimental stuff
+// //////////////////////////////////////////
 
 // spawn a new wall every x millisecond
 let wallSpawnTimer = setInterval(function a(){
@@ -102,11 +109,7 @@ let wallTimer = setInterval(function a(){
         wall.move();
 }, 100);
 
-// move wall left every x millisecond
-// window.setInterval(function a(){
-//     wall.move();
-// }, 500);
-
+// register button for moving the bird up
 document.getElementById("bird-up").addEventListener('click',function () {
     bird.moveUp();
 });
