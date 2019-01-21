@@ -30,6 +30,8 @@ class Wall {
         // get div elements
         this.wallDisplayU = document.getElementById('wall-upper-'+wallID);
         this.wallDisplayL = document.getElementById('wall-lower-'+wallID);
+        // store walls own id
+        this.wallID = wallID;
         // store coordinates
         this.upperPosition = {
             x: 1280,
@@ -42,10 +44,18 @@ class Wall {
     }
     // move wall left by n pixel
     move() {
+        // move walls x position
         this.lowerPosition.x -= 50;
         this.upperPosition.x -= 50;
+        // display changes on page
         this.wallDisplayU.style.left = this.lowerPosition.x+'px';
         this.wallDisplayL.style.left = this.lowerPosition.x+'px';
+        // check if wall reached it's end
+        if(this.lowerPosition.x < 20){
+            document.getElementById('wall-upper-'+this.wallID).remove();
+            document.getElementById('wall-lower-'+this.wallID).remove();
+            deleteWall(this.wallID)
+        }
     }
 }
 
@@ -56,7 +66,7 @@ let gameWindow = document.getElementById('game-window');
 // create bird
 let bird = new Bird();
 // create container for walls
-let newWall = 1;
+let newWallID = 0;
 let walls = [];
 
 
@@ -68,15 +78,29 @@ let birdTimer = window.setInterval(function a(){
 
 // spawn a new wall every x millisecond
 let wallSpawnTimer = setInterval(function a(){
-    let wall = new Wall(newWall);
+    let newWallDiv = document.createElement('div');
+    newWallDiv.setAttribute("id", "wall-lower-"+newWallID);
+    newWallDiv.setAttribute("class", "wall-lower");
+    gameWindow.appendChild(newWallDiv);
+    newWallDiv = document.createElement('div');
+    newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
+    newWallDiv.setAttribute("class", "wall-upper");
+    gameWindow.appendChild(newWallDiv);
+    let wall = new Wall(newWallID);
     walls.push(wall);
+    newWallID += 1;
 }, 5000);
+
+function deleteWall(id){
+    walls.pop(id)
+}
 
 // move all walls every x millisecond
 let wallTimer = setInterval(function a(){
+    console.log(walls);
     for(wall of walls)
         wall.move();
-}, 200);
+}, 100);
 
 // move wall left every x millisecond
 // window.setInterval(function a(){
