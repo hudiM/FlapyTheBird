@@ -5,7 +5,7 @@ body{
 .game-window {
     border: white 1px solid;
     position: absolute;
-    left: 100px;
+    margin: 5% 15% 5% 15%;
     width: 1280px;
     height: 720px;
     background: url("/static/background-day.png");
@@ -17,7 +17,7 @@ body{
 .bird {
     position: inherit;
     left: 150px;
-    border: 1px lawngreen solid;
+    border: 1px black solid;
 }
 
 .wall-upper {
@@ -25,13 +25,21 @@ body{
     background-color: dimgrey;
     border: red 1px solid;
     left: 1300px;
-    width: 20px;
+    width: 52px;
+    font-size: 0;
 }
 
 .wall-lower {
     position: inherit;
+    transform: rotateY(180deg);
     background-color: dimgrey;
     border: lightseagreen 1px solid;
     left: 1300px;
-    width: 20px;
+    width: 52px;
+}
+
+.image{
+    float: left;
+    padding: 0;
+    margin: 0;
 }

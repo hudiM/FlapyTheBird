@@ -41,6 +41,20 @@ class Bird {
         }
         else{hit()}
     }
+    // move bird down
+    moveDeath() {
+        if(this.position.y <= GAME_HEIGHT-64-this.position.fall){
+            this.position.y += this.position.fall;
+            this.birdDisplay.style.top = this.position.y+'px';
+            this.position.fallReset++;
+            if(this.position.fall < 10 && this.position.fallReset > 4){
+                this.position.fall++;
+                this.position.fallReset = 0;
+            }
+        } else {
+            clearInterval(birdTimer);
+        }
+    }
 }
 
 class Wall {
@@ -55,13 +69,13 @@ class Wall {
             x: 1280,
             y: 0,
             height: upperHeight,
-            width: 20,
+            width: 52,
         };
         this.lowerPosition = {
             x: 1280,
             y: lowerPosY,
             height: lowerHeight,
-            width: 20,
+            width: 52,
         };
     }
     // move wall left by n pixel
@@ -80,14 +94,6 @@ class Wall {
             if(bird.position.y < this.upperPosition.height || bird.position.y+bird.size.height > this.lowerPosition.y)
                 hit();
     }
-}
-
-function hit(){
-    window.removeEventListener('keypress', jump);
-    clearInterval(wallTimer);
-    clearInterval(wallSpawnTimer);
-    clearInterval(birdFlaps);
-    console.log('Wall hit!')
 }
 
 // get general elements
@@ -126,9 +132,15 @@ let birdFlaps = window.setInterval(function a() {
 // //////////////////////////////////////////
 // spawn a new wall every x millisecond
 let wallSpawnTimer = setInterval(function a(){
-    let upperHeight = Math.floor(Math.random()*500);
+    let boxHeight = 1;
+    while(boxHeight%26 && boxHeight !== 0 )
+    {
+        boxHeight = Math.floor(Math.random()*500)
+    }
+    let upperHeight = boxHeight;
     let lowerHeight = 720-upperHeight-200;
     let lowerPositionY = upperHeight+200;
+    // create divs
     let newWallDiv = document.createElement('div');
     newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
     newWallDiv.setAttribute("class", "wall-upper");
@@ -137,6 +149,22 @@ let wallSpawnTimer = setInterval(function a(){
     newWallDiv.setAttribute("id", "wall-lower-"+newWallID);
     newWallDiv.setAttribute("class", "wall-lower");
     gameWindow.appendChild(newWallDiv);
+
+    // create img blocks
+    if((boxHeight/26) > 1)
+        for(i=boxHeight/26;i>1;i--){
+            console.log(i);
+            let newBlock = document.createElement('img');
+            newBlock.setAttribute("src", "/static/pipe-green.png");
+            newBlock.setAttribute("class", "image");
+            document.getElementById('wall-upper-'+newWallID).appendChild(newBlock);
+        }
+    // create top img block
+    let newTop = document.createElement('img');
+    newTop.setAttribute("src", "/static/pipe-green-top.png");
+    newTop.setAttribute("style", "transform: scaleY(-1)");
+    document.getElementById('wall-upper-'+newWallID).appendChild(newTop);
+
     walls.push(new Wall(newWallID, upperHeight, lowerHeight, lowerPositionY));
     newWallID += 1;
 }, 3000);
@@ -163,4 +191,16 @@ window.addEventListener("keypress", jump);
 
 function jump() {
     bird.moveUp();
+}
+
+function hit(){
+    window.removeEventListener('keypress', jump);
+    clearInterval(wallTimer);
+    clearInterval(wallSpawnTimer);
+    clearInterval(birdFlaps);
+    clearInterval(birdTimer);
+    let birdTimer = window.setInterval(function a(){
+        bird.moveDeath();
+    }, 25);
+    console.log('Wall hit!')
 }
