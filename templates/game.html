@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <script src="{{ url_for('static', filename = 'game.js') }}" defer></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'game.css') }}">
-    <title>FlapyTheBurd</title>
+    <title>FlapyTheBurd by Happy Flappers</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
     <button type="button" id="bird-up">Up</button><br>
     <div id="game-window" class="game-window">
-        <div class="bird" id="bird">
-            <img id="bird" src="{{ url_for('static', filename='neko.gif') }}" height="64" width="64">
-        </div>
-{#        <div id="wall-upper-0" class="wall-upper"></div>#}
-{#        <div id="wall-lower-0" class="wall-lower"></div>#}
     </div>
 </body>
 </html>
