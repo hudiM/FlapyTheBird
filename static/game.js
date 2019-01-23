@@ -6,12 +6,12 @@ class Bird {
     constructor(){
         // get birds div element
         this.birdDisplay = document.getElementById('bird');
-        // store it's current location
+        // store it's current location and fall speed
         this.position = {
             x: 50,
             y: 150,
             fall: 1,
-            fallReset: 120
+            fallReset: 120 // variable to slow timer
         };
         // store size of bird
         this.size = {
@@ -21,28 +21,40 @@ class Bird {
     }
     // move bird up
     moveUp() {
+        // check if hit bottom
         if(this.position.y >= 50){
+            // move the bird up by x px
             this.position.y -= 50;
+            // display on user side
             this.birdDisplay.style.top = this.position.y+'px';
+            // reset fall speed
             this.position.fall = 1;
         }
+        // if hit bottom end game
         else{hit()}
     }
     // move bird down
     moveDown() {
-        if(this.position.y <= GAME_HEIGHT-64-this.position.fall){
+        // check if hit top of screen
+        if(this.position.y <= GAME_HEIGHT-this.size.height-this.position.fall){
+            // change y position on JS side by fall speed
             this.position.y += this.position.fall;
+            // display on user side
             this.birdDisplay.style.top = this.position.y+'px';
+            // trickery to slow down execution time
             this.position.fallReset++;
             if(this.position.fall < 10 && this.position.fallReset > 4){
+                // speed up fall
                 this.position.fall++;
+                // reset execution slower
                 this.position.fallReset = 0;
             }
         }
         else{hit()}
     }
-    // move bird down
+    // move bird down when player died
     moveDeath() {
+        // pretty much same as move down
         if(this.position.y <= GAME_HEIGHT-64-this.position.fall){
             this.position.y += this.position.fall;
             this.birdDisplay.style.top = this.position.y+'px';
@@ -51,8 +63,6 @@ class Bird {
                 this.position.fall++;
                 this.position.fallReset = 0;
             }
-        } else {
-            clearInterval(birdTimer);
         }
     }
 }
@@ -64,7 +74,7 @@ class Wall {
         this.wallDisplayL = document.getElementById('wall-lower-'+wallID);
         // store walls own id
         this.wallID = wallID;
-        // store coordinates
+        // store coordinates and sizes
         this.upperPosition = {
             x: 1280,
             y: 0,
@@ -86,6 +96,7 @@ class Wall {
         // display changes on page
         this.wallDisplayU.style.cssText = 'left: '+this.upperPosition.x+'px;height: '+this.upperPosition.height+'px;';
         this.wallDisplayL.style.cssText = 'top: '+this.lowerPosition.y+'px;left: '+this.lowerPosition.x+'px;height: '+this.lowerPosition.height+'px;';
+        // check if bird hit this wall
         this.hitBox();
     }
     // check if wall's been hit
@@ -99,18 +110,20 @@ class Wall {
 // get general elements
 let gameWindow = document.getElementById('game-window');
 
-// create bird
+// create bird html element
 let birdObject = document.createElement('img');
 birdObject.setAttribute("id", "bird");
 birdObject.setAttribute("class", "bird");
 birdObject.setAttribute("height", "45");
 birdObject.setAttribute("width", "64");
 birdObject.setAttribute("src", "/static/yellowbird-midflap.png");
+// add bird to page
 gameWindow.appendChild(birdObject);
+// create bird JS element
 let bird = new Bird();
-// walls individual id
+// walls individual id when spawning
 let newWallID = 0;
-// create container for walls
+// create container for walls to store individual walls for deletion
 let walls = [];
 
 // move the bird down every x millisecond
@@ -118,6 +131,7 @@ let birdTimer = window.setInterval(function a(){
     bird.moveDown();
 }, 25);
 
+// animate the bird
 let birdFlaps = window.setInterval(function a() {
     if(bird.birdDisplay.src.endsWith('downflap.png'))
         bird.birdDisplay.src = '/static/yellowbird-midflap.png';
@@ -127,80 +141,99 @@ let birdFlaps = window.setInterval(function a() {
         bird.birdDisplay.src = '/static/yellowbird-downflap.png';
 }, 50);
 
-// //////////////////////////////////////////
-//           experimental stuff
-// //////////////////////////////////////////
 // spawn a new wall every x millisecond
 let wallSpawnTimer = setInterval(function a(){
+    // variable for wall height
     let boxHeight = 1;
+    // generate a new number till we get one that's divedable by 26(one blocks size) and not 0
     while(boxHeight%26 && boxHeight !== 0 )
     {
         boxHeight = Math.floor(Math.random()*500)
     }
+    // calculate bottom and middle height by the top height
     let upperHeight = boxHeight;
     let lowerHeight = 720-upperHeight-200;
     let lowerPositionY = upperHeight+200;
-    // create divs
+    // create top wall div
     let newWallDiv = document.createElement('div');
     newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
     newWallDiv.setAttribute("class", "wall-upper");
+    // add top wall div to page
     gameWindow.appendChild(newWallDiv);
+    // create bottom wall div
     newWallDiv = document.createElement('div');
     newWallDiv.setAttribute("id", "wall-lower-"+newWallID);
     newWallDiv.setAttribute("class", "wall-lower");
+    // add bottom wall div to page
     gameWindow.appendChild(newWallDiv);
 
     // create img blocks
+    // check if we have more than just the top block
     if((boxHeight/26) > 1)
+        // for every extra block of space spawn a new middle block
         for(i=boxHeight/26;i>1;i--){
-            console.log(i);
+            // create img block element
             let newBlock = document.createElement('img');
             newBlock.setAttribute("src", "/static/pipe-green.png");
             newBlock.setAttribute("class", "image");
+            // add the middle img block to the page
             document.getElementById('wall-upper-'+newWallID).appendChild(newBlock);
         }
     // create top img block
     let newTop = document.createElement('img');
     newTop.setAttribute("src", "/static/pipe-green-top.png");
     newTop.setAttribute("style", "transform: scaleY(-1)");
+    // add the top img block to the page
     document.getElementById('wall-upper-'+newWallID).appendChild(newTop);
-
+    // add the newly created wall to JS container for later deletion
     walls.push(new Wall(newWallID, upperHeight, lowerHeight, lowerPositionY));
+    // increment the wallID for next wall spawning
     newWallID += 1;
 }, 3000);
 
 // move all walls every x millisecond
 let wallTimer = setInterval(function a(){
+    // variable to count how many walls to remove
     let deleteCommand = 0;
+    // move every wall that's currently spawned (inside walls container)
     for(wall of walls){
         wall.move();
         // check if wall reached it's end
         if(wall.lowerPosition.x < -20){
+            // add one to the number of walls to delete
             deleteCommand++;
+            // remove the wall divs from the page
             document.getElementById('wall-upper-'+wall.wallID).remove();
             document.getElementById('wall-lower-'+wall.wallID).remove();
         }
     }
+    // if there's a wall or more walls to delete, remove them from JS side
     if(deleteCommand){
         walls.splice(0,deleteCommand);
     }
 }, 10);
 
-
+// create jump event on any keypress
 window.addEventListener("keypress", jump);
-
+// function to move the bird up on keypress
 function jump() {
     bird.moveUp();
 }
-
+// if bird hit any boundary kill
 function hit(){
+    // remove keypress check
     window.removeEventListener('keypress', jump);
+    // clear timers for game events
     clearInterval(wallTimer);
     clearInterval(wallSpawnTimer);
     clearInterval(birdFlaps);
     clearInterval(birdTimer);
+    // make a timer that moves the bird to the bottom of the page
     let birdTimer = window.setInterval(function a(){
         bird.moveDeath();
     }, 25);
+    // if bottom of the page reached remove it
+    clearInterval(birdTimer);
+    // debug string
     console.log('Wall hit!')
 }
