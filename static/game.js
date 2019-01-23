@@ -223,10 +223,10 @@ function hit(){
     // remove keypress check
     window.removeEventListener('keypress', jump);
     // clear timers for game events
-    clearInterval(wallTimer);
-    clearInterval(wallSpawnTimer);
-    clearInterval(birdFlaps);
     clearInterval(birdTimer);
+    clearInterval(birdFlaps);
+    clearInterval(wallSpawnTimer);
+    clearInterval(wallTimer);
     // make a timer that moves the bird to the bottom of the page
     let birdTimerDeath = window.setInterval(function a(){
         bird.moveDeath();
