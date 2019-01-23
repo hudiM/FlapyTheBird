@@ -15,31 +15,31 @@ body{
 }
 
 .bird {
-    position: inherit;
+    position: absolute;
     left: 150px;
     border: 1px black solid;
+    z-index: 100;
 }
 
 .wall-upper {
-    position: inherit;
+    position: absolute;
+    background-color: dimgrey;
+    left: 1300px;
+    width: 52px;
+    font-size: 0;
+    z-index: 1;
+}
+
+.wall-lower {
+    position: absolute;
+    transform: rotateY(180deg);
     background-color: dimgrey;
     border: red 1px solid;
     left: 1300px;
     width: 52px;
-    font-size: 0;
-}
-
-.wall-lower {
-    position: inherit;
-    transform: rotateY(180deg);
-    background-color: dimgrey;
-    border: lightseagreen 1px solid;
-    left: 1300px;
-    width: 52px;
+    z-index: 10;
 }
 
 .image{
     float: left;
-    padding: 0;
-    margin: 0;
 }

@@ -8,7 +8,7 @@ class Bird {
         this.birdDisplay = document.getElementById('bird');
         // store it's current location and fall speed
         this.position = {
-            x: 50,
+            x: 150,
             y: 150,
             fall: 1,
             fallReset: 120 // variable to slow timer
@@ -55,7 +55,7 @@ class Bird {
     // move bird down when player died
     moveDeath() {
         // pretty much same as move down
-        if(this.position.y <= GAME_HEIGHT-64-this.position.fall){
+        if(this.position.y <= GAME_HEIGHT-this.size.height-this.position.fall){
             this.position.y += this.position.fall;
             this.birdDisplay.style.top = this.position.y+'px';
             this.position.fallReset++;
@@ -71,7 +71,9 @@ class Wall {
     constructor(wallID, upperHeight, lowerHeight , lowerPosY){
         // get div elements
         this.wallDisplayU = document.getElementById('wall-upper-'+wallID);
+        this.debugU = document.getElementById('wall-upper-hitbox-'+wallID);
         this.wallDisplayL = document.getElementById('wall-lower-'+wallID);
+        this.debugL = document.getElementById('wall-lower-hitbox-'+wallID);
         // store walls own id
         this.wallID = wallID;
         // store coordinates and sizes
@@ -101,7 +103,8 @@ class Wall {
     }
     // check if wall's been hit
     hitBox() {
-        if(bird.position.x+bird.size.width >= this.lowerPosition.x && bird.position.x+bird.size.width < this.lowerPosition.x+this.lowerPosition.width)
+        if((bird.position.x > this.lowerPosition.x && bird.position.x < this.lowerPosition.x+this.lowerPosition.width) ||
+            (bird.position.x+bird.size.width > this.lowerPosition.x && bird.position.x+bird.size.width < this.lowerPosition.x+this.lowerPosition.width))
             if(bird.position.y < this.upperPosition.height || bird.position.y+bird.size.height > this.lowerPosition.y)
                 hit();
     }
@@ -143,17 +146,12 @@ let birdFlaps = window.setInterval(function a() {
 
 // spawn a new wall every x millisecond
 let wallSpawnTimer = setInterval(function a(){
-    // variable for wall height
-    let boxHeight = 1;
-    // generate a new number till we get one that's divedable by 26(one blocks size) and not 0
-    while(boxHeight%26 && boxHeight !== 0 )
-    {
-        boxHeight = Math.floor(Math.random()*500)
-    }
+    // variable for wall height generated randomly
+    let boxHeight = Math.floor(Math.random()*20);
     // calculate bottom and middle height by the top height
-    let upperHeight = boxHeight;
-    let lowerHeight = 720-upperHeight-200;
-    let lowerPositionY = upperHeight+200;
+    let upperHeight = boxHeight*26;
+    let lowerHeight = (20-boxHeight)*26;
+    let lowerPositionY = GAME_HEIGHT-(lowerHeight+upperHeight)+upperHeight;
     // create top wall div
     let newWallDiv = document.createElement('div');
     newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
@@ -169,9 +167,9 @@ let wallSpawnTimer = setInterval(function a(){
 
     // create img blocks
     // check if we have more than just the top block
-    if((boxHeight/26) > 1)
+    if(boxHeight > 1)
         // for every extra block of space spawn a new middle block
-        for(i=boxHeight/26;i>1;i--){
+        for(i=boxHeight;i>1;i--){
             // create img block element
             let newBlock = document.createElement('img');
             newBlock.setAttribute("src", "/static/pipe-green.png");
@@ -219,6 +217,7 @@ window.addEventListener("keypress", jump);
 function jump() {
     bird.moveUp();
 }
+
 // if bird hit any boundary kill
 function hit(){
     // remove keypress check
@@ -229,11 +228,9 @@ function hit(){
     clearInterval(birdFlaps);
     clearInterval(birdTimer);
     // make a timer that moves the bird to the bottom of the page
-    let birdTimer = window.setInterval(function a(){
+    let birdTimerDeath = window.setInterval(function a(){
         bird.moveDeath();
     }, 25);
-    // if bottom of the page reached remove it
-    clearInterval(birdTimer);
     // debug string
     console.log('Wall hit!')
 }
