@@ -104,14 +104,17 @@ class Wall {
     // check if wall's been hit
     hitBox() {
         if((bird.position.x > this.lowerPosition.x && bird.position.x < this.lowerPosition.x+this.lowerPosition.width) ||
-            (bird.position.x+bird.size.width > this.lowerPosition.x && bird.position.x+bird.size.width < this.lowerPosition.x+this.lowerPosition.width))
+            (bird.position.x+bird.size.width > this.lowerPosition.x && bird.position.x+bird.size.width < this.lowerPosition.x+this.lowerPosition.width)){
+
+            showScore(this.wallID);
             if(bird.position.y < this.upperPosition.height || bird.position.y+bird.size.height > this.lowerPosition.y)
-                hit();
+                hit();}
     }
 }
 
 // get general elements
 let gameWindow = document.getElementById('game-window');
+let scoreWindow = document.getElementById('score');
 
 // create bird html element
 let birdObject = document.createElement('img');
@@ -125,112 +128,165 @@ gameWindow.appendChild(birdObject);
 // create bird JS element
 let bird = new Bird();
 // walls individual id when spawning
-let newWallID = 0;
+let newWallID = 1;
 // create container for walls to store individual walls for deletion
 let walls = [];
 
-// move the bird down every x millisecond
-let birdTimer = window.setInterval(function a(){
-    bird.moveDown();
-}, 25);
+let birdTimer = 0;
+let birdFlaps = 0;
+let wallSpawnTimer = 0;
+let wallTimer = 0;
+newGame();
+function startGame(){
+    newScoreImage();
+    document.getElementById('start').remove();
+    bird.position.x = 150;
+    bird.position.y = 150;
+    // move the bird down every x millisecond
+    birdTimer = window.setInterval(function a(){
+        bird.moveDown();
+    }, 25);
 
-// animate the bird
-let birdFlaps = window.setInterval(function a() {
-    if(bird.birdDisplay.src.endsWith('downflap.png'))
-        bird.birdDisplay.src = '/static/yellowbird-midflap.png';
-    else if(bird.birdDisplay.src.endsWith('midflap.png'))
-        bird.birdDisplay.src = '/static/yellowbird-upflap.png';
-    else if(bird.birdDisplay.src.endsWith('upflap.png'))
-        bird.birdDisplay.src = '/static/yellowbird-downflap.png';
-}, 50);
+    // animate the bird
+    birdFlaps = window.setInterval(function a() {
+        if(bird.birdDisplay.src.endsWith('downflap.png'))
+            bird.birdDisplay.src = '/static/yellowbird-midflap.png';
+        else if(bird.birdDisplay.src.endsWith('midflap.png'))
+            bird.birdDisplay.src = '/static/yellowbird-upflap.png';
+        else if(bird.birdDisplay.src.endsWith('upflap.png'))
+            bird.birdDisplay.src = '/static/yellowbird-downflap.png';
+    }, 50);
 
-// spawn a new wall every x millisecond
-let wallSpawnTimer = setInterval(function a(){
-    // variable for wall height generated randomly
-    let boxHeight = Math.floor(Math.random()*20);
-    // calculate bottom and middle height by the top height
-    let upperHeight = boxHeight*26;
-    let lowerHeight = (20-boxHeight)*26;
-    let lowerPositionY = GAME_HEIGHT-(lowerHeight+upperHeight)+upperHeight;
-    // create top wall div
-    let newWallDiv = document.createElement('div');
-    newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
-    newWallDiv.setAttribute("class", "wall-upper");
-    // add top wall div to page
-    gameWindow.appendChild(newWallDiv);
-    // create bottom wall div
-    newWallDiv = document.createElement('div');
-    newWallDiv.setAttribute("id", "wall-lower-"+newWallID);
-    newWallDiv.setAttribute("class", "wall-lower");
-    // add bottom wall div to page
-    gameWindow.appendChild(newWallDiv);
+    // spawn a new wall every x millisecond
+    wallSpawnTimer = window.setInterval(function a(){
+        // variable for wall height generated randomly
+        let boxHeight = Math.floor(Math.random()*20);
+        let lowerBoxHeight = 20-boxHeight;
+        // calculate bottom and middle height by the top height
+        let upperHeight = boxHeight*26;
+        let lowerHeight = (20-boxHeight)*26;
+        let lowerPositionY = GAME_HEIGHT-(lowerHeight+upperHeight)+upperHeight;
+        // create top wall div
+        let newWallDiv = document.createElement('div');
+        newWallDiv.setAttribute("id", "wall-upper-"+newWallID);
+        newWallDiv.setAttribute("class", "wall-upper");
+        // add top wall div to page
+        gameWindow.appendChild(newWallDiv);
+        // create bottom wall div
+        newWallDiv = document.createElement('div');
+        newWallDiv.setAttribute("id", "wall-lower-"+newWallID);
+        newWallDiv.setAttribute("class", "wall-lower");
+        // add bottom wall div to page
+        gameWindow.appendChild(newWallDiv);
 
-    // create img blocks
-    // check if we have more than just the top block
-    if(boxHeight > 1)
-        // for every extra block of space spawn a new middle block
-        for(i=boxHeight;i>1;i--){
-            // create img block element
-            let newBlock = document.createElement('img');
-            newBlock.setAttribute("src", "/static/pipe-green.png");
-            newBlock.setAttribute("class", "image");
-            // add the middle img block to the page
-            document.getElementById('wall-upper-'+newWallID).appendChild(newBlock);
+        // create img blocks
+        // check if we have more than just the top block
+        if(boxHeight > 1)
+            // for every extra block of space spawn a new middle block
+            for(i=boxHeight;i>1;i--){
+                // create img block element
+                let newBlock = document.createElement('img');
+                newBlock.setAttribute("src", "/static/pipe-green.png");
+                newBlock.setAttribute("class", "image");
+                // add the middle img block to the page
+                document.getElementById('wall-upper-'+newWallID).appendChild(newBlock);
+            }
+        // create top img block
+        let newTop = document.createElement('img');
+        newTop.setAttribute("src", "/static/pipe-green-top.png");
+        newTop.setAttribute("style", "transform: scaleY(-1)");
+        // add the top img block to the page
+        document.getElementById('wall-upper-'+newWallID).appendChild(newTop);
+
+        newTop = document.createElement('img');
+        newTop.setAttribute("src", "/static/pipe-green-top.png");
+        newTop.setAttribute("class", "image");
+        document.getElementById('wall-lower-'+newWallID).appendChild(newTop);
+        if(lowerBoxHeight > 1)
+            // for every extra block of space spawn a new middle block
+            for(i=lowerBoxHeight;i>1;i--){
+                // create img block element
+                let newBlock = document.createElement('img');
+                newBlock.setAttribute("src", "/static/pipe-green.png");
+                newBlock.setAttribute("class", "image");
+                // add the middle img block to the page
+                document.getElementById('wall-lower-'+newWallID).appendChild(newBlock);
+            }
+
+        // add the newly created wall to JS container for later deletion
+        walls.push(new Wall(newWallID, upperHeight, lowerHeight, lowerPositionY));
+        // increment the wallID for next wall spawning
+        newWallID += 1;
+    }, 3000);
+
+    // move all walls every x millisecond
+    wallTimer = window.setInterval(function a(){
+        // variable to count how many walls to remove
+        let deleteCommand = 0;
+        // move every wall that's currently spawned (inside walls container)
+        for(wall of walls){
+            wall.move();
+            // check if wall reached it's end
+            if(wall.lowerPosition.x < -20){
+                // add one to the number of walls to delete
+                deleteCommand++;
+                // remove the wall divs from the page
+                document.getElementById('wall-upper-'+wall.wallID).remove();
+                document.getElementById('wall-lower-'+wall.wallID).remove();
+            }
         }
-    // create top img block
-    let newTop = document.createElement('img');
-    newTop.setAttribute("src", "/static/pipe-green-top.png");
-    newTop.setAttribute("style", "transform: scaleY(-1)");
-    // add the top img block to the page
-    document.getElementById('wall-upper-'+newWallID).appendChild(newTop);
-    // add the newly created wall to JS container for later deletion
-    walls.push(new Wall(newWallID, upperHeight, lowerHeight, lowerPositionY));
-    // increment the wallID for next wall spawning
-    newWallID += 1;
-}, 3000);
-
-// move all walls every x millisecond
-let wallTimer = setInterval(function a(){
-    // variable to count how many walls to remove
-    let deleteCommand = 0;
-    // move every wall that's currently spawned (inside walls container)
-    for(wall of walls){
-        wall.move();
-        // check if wall reached it's end
-        if(wall.lowerPosition.x < -20){
-            // add one to the number of walls to delete
-            deleteCommand++;
-            // remove the wall divs from the page
-            document.getElementById('wall-upper-'+wall.wallID).remove();
-            document.getElementById('wall-lower-'+wall.wallID).remove();
+        // if there's a wall or more walls to delete, remove them from JS side
+        if(deleteCommand){
+            walls.splice(0,deleteCommand);
         }
-    }
-    // if there's a wall or more walls to delete, remove them from JS side
-    if(deleteCommand){
-        walls.splice(0,deleteCommand);
-    }
-}, 10);
+    }, 10);
 
-// create jump event on any keypress
-window.addEventListener("keypress", jump);
+    // create jump event on any keypress
+    window.addEventListener("keypress", jump);
+    window.addEventListener("click", jump);
+}
 // function to move the bird up on keypress
 function jump() {
     bird.moveUp();
 }
-
 // if bird hit any boundary kill
 function hit(){
+
+    let gameOverObject = document.createElement('img');
+    gameOverObject.setAttribute("id", "game-over");
+    gameOverObject.setAttribute("class", "game-over");
+    gameOverObject.setAttribute("src", "/static/gameover.png");
+    gameWindow.appendChild(gameOverObject);
+
     // remove keypress check
     window.removeEventListener('keypress', jump);
+    window.removeEventListener('click', jump);
     // clear timers for game events
-    clearInterval(birdTimer);
-    clearInterval(birdFlaps);
-    clearInterval(wallSpawnTimer);
-    clearInterval(wallTimer);
+    window.clearInterval(birdTimer);
+    window.clearInterval(birdFlaps);
+    window.clearInterval(wallSpawnTimer);
+    window.clearInterval(wallTimer);
     // make a timer that moves the bird to the bottom of the page
     let birdTimerDeath = window.setInterval(function a(){
         bird.moveDeath();
     }, 25);
     // debug string
     console.log('Wall hit!')
+}
+
+function showScore(number) {
+    scoreWindow.textContent = number
+}
+
+function newScoreImage() {
+    scoreWindow.textContent = '0'
+}
+function newGame() {
+    let newGameButton = document.createElement('button');
+    newGameButton.setAttribute("id", "start");
+    newGameButton.setAttribute("class", "start");
+    gameWindow.appendChild(newGameButton);
+    document.getElementById('start').textContent = 'Start';
+    document.getElementById('start').addEventListener('click', startGame);
+    document.getElementById('start').addEventListener('keypress', startGame);
 }

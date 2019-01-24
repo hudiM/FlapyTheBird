@@ -1,5 +1,6 @@
 body{
     background: black;
+    font-family: 'Roboto', sans-serif;
 }
 
 .game-window {
@@ -17,13 +18,12 @@ body{
 .bird {
     position: absolute;
     left: 150px;
-    border: 1px black solid;
+    top: 150px;
     z-index: 100;
 }
 
 .wall-upper {
     position: absolute;
-    background-color: dimgrey;
     left: 1300px;
     width: 52px;
     font-size: 0;
@@ -33,13 +33,40 @@ body{
 .wall-lower {
     position: absolute;
     transform: rotateY(180deg);
-    background-color: dimgrey;
-    border: red 1px solid;
     left: 1300px;
     width: 52px;
-    z-index: 10;
+    z-index: 1;
 }
 
 .image{
     float: left;
+}
+
+.score{
+    color: white;
+    font-size: 55px;
+    left: 640px;
+    top: 150px;
+    position: absolute;
+    z-index: 100;
+}
+
+.game-over{
+    position: relative;
+    z-index: 100;
+    left: 43%;
+    top: 230px;
+}
+
+.start{
+    position: absolute;
+    z-index: 100;
+    top: 230px;
+    left: 43%;
+    width: 200px;
+    height: 100px;
+    font-size: 40px;
+    border-radius: 10px;
+    background-color: lime;
+    border-color: black;
 }
